@@ -1,4 +1,4 @@
-import React, { Component, useEffect, useState } from "react";
+import React, { Component, useCallback, useEffect, useState } from "react";
 import mojs from "mo-js";
 import styles from "./index.css";
 
@@ -11,22 +11,25 @@ const initialState = {
 /**
  * Custom hooks for animation
  */
-const useClapAnimation = () => {
+const useClapAnimation = ({ clapEl, clapCountEl, clapTotalEl }) => {
   const [animationTimeline, setAnimationTimeline] = useState(
     () => new mojs.Timeline()
   );
 
   useEffect(() => {
+    if(!clapEl || !clapCountEl || !clapTotalEl){
+      return;
+    }
     const tlDuration = 300;
     const scaleButton = new mojs.Html({
-      el: "#clap",
+      el: clapEl,
       duration: tlDuration,
       scale: { 1.3: 1 },
       easing: mojs.easing.ease.out,
     });
 
     const triangleBurst = new mojs.Burst({
-      parent: "#clap",
+      parent: clapEl,
       radius: { 50: 95 },
       count: 5,
       angle: 30,
@@ -44,7 +47,7 @@ const useClapAnimation = () => {
     });
 
     const circleBurst = new mojs.Burst({
-      parent: "#clap",
+      parent: clapEl,
       radius: { 50: 95 },
       count: 5,
       angle: 25,
@@ -60,7 +63,7 @@ const useClapAnimation = () => {
     });
 
     const countAnimation = new mojs.Html({
-      el: "#clapCount",
+      el: clapCountEl,
       opacity: { 0: 1 },
       duration: tlDuration,
       y: { 0: -30 },
@@ -71,15 +74,20 @@ const useClapAnimation = () => {
     });
 
     const countTotalAnimation = new mojs.Html({
-      el: "#countTotal",
+      el: clapTotalEl,
       opacity: { 0: 1 },
       delay: (3 * tlDuration) / 2,
       duration: tlDuration,
       y: { 0: -3 },
     });
 
-    const clap = document.getElementById("clap");
-    clap.style.transform = "scale(1,1)";
+    // clapEl
+    if (typeof clapEl === "string") {
+      const clap = document.getElementById("clap");
+      clap.style.transform = "scale(1,1)";
+    } else {
+      clapEl.style.transform = "scale(1,1)";
+    }
 
     const newAnimationTimeline = animationTimeline.add([
       scaleButton,
@@ -89,7 +97,7 @@ const useClapAnimation = () => {
       circleBurst,
     ]);
     setAnimationTimeline(newAnimationTimeline);
-  }, []);
+  }, [clapEl, clapCountEl, clapTotalEl]);
 
   return animationTimeline;
 };
@@ -99,7 +107,20 @@ const MediumClap = () => {
   const [clapState, setClapState] = useState(initialState);
   const { count, countTotal, isClicked } = clapState;
 
-  const animationTimeline = useClapAnimation();
+  const [{ clapRef, clapCountRef, clapTotalRef }, setRefState] = useState({});
+
+  const setRef = useCallback((node) => {
+    setRefState((prevRefState) => ({
+      ...prevRefState,
+      [node.dataset.refkey]: node,
+    }));
+  }, []);
+
+  const animationTimeline = useClapAnimation({
+    clapEl: clapRef,
+    clapCountEl: clapCountRef,
+    clapTotalEl: clapTotalRef,
+  });
 
   const handleClapClick = () => {
     animationTimeline.replay();
@@ -114,10 +135,14 @@ const MediumClap = () => {
   };
 
   return (
-    <button id="clap" className={styles.clap} onClick={handleClapClick}>
+    <button
+      ref={setRef}
+      data-refkey="clapRef"
+      className={styles.clap}
+      onClick={handleClapClick}>
       <ClapIcon isClicked={isClicked} />
-      <ClapCount count={count} />
-      <CountTotal countTotal={countTotal} />
+      <ClapCount count={count} setRef={setRef} />
+      <CountTotal countTotal={countTotal} setRef={setRef}/>
     </button>
   );
 };
@@ -141,17 +166,17 @@ const ClapIcon = ({ isClicked }) => {
   );
 };
 
-const ClapCount = ({ count }) => {
+const ClapCount = ({ count, setRef }) => {
   return (
-    <span id="clapCount" className={styles.count}>
+    <span ref={setRef} data-refkey="clapCountRef" className={styles.count}>
       +{count}
     </span>
   );
 };
 
-const CountTotal = ({ countTotal }) => {
+const CountTotal = ({ countTotal, setRef }) => {
   return (
-    <span id="countTotal" className={styles.total}>
+    <span ref={setRef} data-refkey="clapTotalRef" className={styles.total}>
       {countTotal}
     </span>
   );
