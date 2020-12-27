@@ -12,13 +12,11 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
+        loader: "babel-loader",
         exclude: /node_modules/,
-        use: {
-          loader: "babel-loader",
-          options: {
-            presets: ["@babel/preset-env", "@babel/preset-react"],
-            plugins: ["babel/plugin-proposal-class-properties"],
-          },
+        options: {
+          presets: ["@babel/preset-env", "@babel/preset-react"],
+          plugins: ["@babel/plugin-proposal-class-properties"],
         },
       },
       {
@@ -47,7 +45,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: "./src/public/index.js",
+      template: "./src/public/index.html",
     }),
   ],
 };
