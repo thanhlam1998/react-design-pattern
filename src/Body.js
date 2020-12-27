@@ -149,7 +149,7 @@ const RouteComponent = ({ pattern, patternNumber, isMediumOrLarger }) => {
             <Demo1 />
           </Box>
           {isMediumOrLarger && (
-            <CTAContainer alignRight>
+            <CTAContainer mtop={isMediumOrLarger && "10px"}>
               <Button text={`Why ${title}`} primary />
             </CTAContainer>
           )}

@@ -104,7 +104,7 @@ export const Columns = styled.div`
 
 export const Column = styled.div`
   ${media.md`
-    width: ${() => `${COLUMN_WIDTH}`};
+    width: ${() => `${COLUMN_WIDTH}vw`};
     margin-left: ${({ leftGap }) =>
       leftGap ? `${SIDEBAR_LEFT_PADDING}vw` : "initial"};
   `}
